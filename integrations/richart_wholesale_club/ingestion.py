@@ -33,8 +33,13 @@ def process_csv_files():
     df = pd.merge(products_df,
                   prices_stock_df, on='SKU')
 
-    branch_products = []
+    print(df.columns)
 
+    # Filtering unique values by branch
+    for branch in BRANCHES:
+        df[(df.BRANCH == branch)].drop_duplicates(inplace=True)
+
+    branch_products = []
     for i, row in df[:200].iterrows():
         description = row['DESCRIPTION']
         description_list = description.split(' ')
@@ -53,7 +58,7 @@ def process_csv_files():
         row['NAME'] = re.sub(NOHTMLTAGS_REGEX, '', name)
 
         product = Product(
-            store=STORE_NAME, sku=row['SKU'], barcodes=row['BARCODES'], brand=row['BRAND'], name=row['NAME'], description=row['DESCRIPTION'], package=package, image_url=row['IMAGE_URL'], category=row["CATEGORY"])
+            store=STORE_NAME + row["BRANCH"], sku=row['SKU'], barcodes=row['BARCODES'], brand=row['BRAND'], name=row['NAME'], description=row['DESCRIPTION'], package=package, image_url=row['IMAGE_URL'], category=row["CATEGORY"])
         branch_product = BranchProduct(
             product_id=product.id, branch=row["BRANCH"], stock=row['STOCK'], price=row['PRICE'], product=product)
 
